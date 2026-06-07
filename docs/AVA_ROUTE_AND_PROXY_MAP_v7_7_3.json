@@ -1,0 +1,41 @@
+{
+  "canonical_public_route": "/AV/AVA",
+  "aliases": {
+    "/ava": "/AV/AVA",
+    "/AV/AVA/": "/AV/AVA"
+  },
+  "frontend": {
+    "host": "mtthorne.com / Netlify",
+    "file": "public/ava.html",
+    "config": "public/ava-config.js"
+  },
+  "backend_options": [
+    {
+      "name": "Netlify functions",
+      "base": "same-origin /api",
+      "status": "current scaffold retained"
+    },
+    {
+      "name": "Railway backend",
+      "base": "https://your-ava-backend.up.railway.app",
+      "status": "added in v7.7.3"
+    }
+  ],
+  "api_routes": [
+    "/api/ava-health",
+    "/api/ava-chat",
+    "/api/ava-file",
+    "/api/ava-device",
+    "/api/ava-ingest",
+    "/api/ava-voice"
+  ],
+  "gates": {
+    "public_chat": "off by default",
+    "customer_data": "off by default",
+    "file_retrieval": "off by default",
+    "code_bank": "off by default",
+    "voice": "off by default",
+    "payment": "blocked",
+    "hardware_control": "blocked"
+  }
+}
