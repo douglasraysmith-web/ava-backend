@@ -1,21 +1,12 @@
 {
-  "name": "ava-railway-backend",
-  "version": "1.5.0",
-  "private": true,
+  "name": "ava-backend",
+  "version": "1.0.0",
   "type": "module",
+  "private": true,
   "scripts": {
-    "start": "node src/server.mjs",
-    "check": "node --check src/server.mjs && node --check src/deploy-doctor.mjs && node --check scripts/apply-migration.mjs && node --check scripts/verify-env.mjs",
-    "test": "node scripts/smoke-test.mjs",
-    "migrate": "node scripts/print-migration.mjs",
-    "migrate:apply": "node scripts/apply-migration.mjs",
-    "env:verify": "node scripts/verify-env.mjs"
+    "start": "node server.mjs",
+    "check": "node --check server.mjs",
+    "test": "node server.mjs --self-test"
   },
-  "engines": {
-    "node": ">=18"
-  },
-  "description": "Ava Railway backend with live-proof, visual-status, fast supervisor runtime, owner gates, Postgres migration support, and deployment proof routes. Includes verified-source teaching core and public-safe ArchE backup protocol.",
-  "dependencies": {
-    "pg": "^8.13.1"
-  }
+  "dependencies": {}
 }
