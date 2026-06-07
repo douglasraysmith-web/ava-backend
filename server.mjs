@@ -3,48 +3,67 @@ import http from "node:http";
 const PORT = Number(process.env.PORT || 3000);
 const HOST = "0.0.0.0";
 
-function sendJson(res, status, data) {
-  res.writeHead(status, {
+function corsHeaders() {
+  return {
     "content-type": "application/json; charset=utf-8",
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET,POST,OPTIONS",
     "access-control-allow-headers": "content-type,authorization,x-ava-owner-token"
-  });
+  };
+}
+
+function sendJson(res, status, data) {
+  res.writeHead(status, corsHeaders());
   res.end(JSON.stringify(data, null, 2));
 }
 
-function route(req, res) {
+async function readJson(req) {
+  let body = "";
+  for await (const chunk of req) body += chunk;
+  if (!body.trim()) return {};
+  try {
+    return JSON.parse(body);
+  } catch {
+    return { raw: body };
+  }
+}
+
+function baseStatus() {
+  return {
+    ok: true,
+    service: "ava-backend",
+    ai: "AVA / AV.AI",
+    status: "owner_pilot_backend_online",
+    public_chat: process.env.AVA_ENABLE_PUBLIC_CHAT === "true",
+    customer_data: process.env.AVA_ENABLE_CUSTOMER_DATA === "true",
+    file_retrieval: process.env.AVA_ENABLE_FILE_RETRIEVAL === "true",
+    code_bank: process.env.AVA_ENABLE_CODE_BANK === "true",
+    voice: process.env.AVA_ENABLE_VOICE === "true",
+    payments: process.env.AVA_ALLOW_PAYMENT === "true",
+    automatic_followup: process.env.AVA_ENABLE_FOLLOWUP_DRAFTS === "true",
+    hardware_control: false
+  };
+}
+
+async function route(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
 
   if (req.method === "OPTIONS") {
-    res.writeHead(204, {
-      "access-control-allow-origin": "*",
-      "access-control-allow-methods": "GET,POST,OPTIONS",
-      "access-control-allow-headers": "content-type,authorization,x-ava-owner-token"
-    });
+    res.writeHead(204, corsHeaders());
     return res.end();
   }
 
   if (url.pathname === "/" || url.pathname === "/api/ava-health") {
     return sendJson(res, 200, {
-      ok: true,
-      service: "ava-backend",
-      ai: "AVA / AV.AI",
-      status: "owner_pilot_backend_online",
+      ...baseStatus(),
       route: "/api/ava-health",
-      public_chat: process.env.AVA_ENABLE_PUBLIC_CHAT === "true",
-      customer_data: process.env.AVA_ENABLE_CUSTOMER_DATA === "true",
-      file_retrieval: process.env.AVA_ENABLE_FILE_RETRIEVAL === "true",
-      code_bank: process.env.AVA_ENABLE_CODE_BANK === "true",
-      hardware_control: false,
       message: "AVA backend is online. Advanced features remain gated until owner approval."
     });
   }
 
   if (url.pathname === "/api/ava-readiness") {
     return sendJson(res, 200, {
-      ok: true,
-      service: "ava-backend",
+      ...baseStatus(),
       readiness: "pilot_ready",
       railway_runtime: true,
       database_configured: Boolean(process.env.DATABASE_URL),
@@ -65,9 +84,8 @@ function route(req, res) {
 
   if (url.pathname === "/api/ava-live-proof") {
     return sendJson(res, 200, {
-      ok: true,
+      ...baseStatus(),
       proof: "railway_backend_reachable",
-      service: "ava-backend",
       timestamp: new Date().toISOString(),
       note: "This proves the backend is reachable. It does not prove full AVA activation."
     });
@@ -75,10 +93,32 @@ function route(req, res) {
 
   if (url.pathname === "/api/ava-visual-status") {
     return sendJson(res, 200, {
-      ok: true,
+      ...baseStatus(),
       visible_being: "pending_owner_upload",
       owner_approved: process.env.AVA_VISIBLE_BEING_OWNER_APPROVED === "true",
       asset_url: process.env.AVA_VISIBLE_BEING_ASSET_URL || null
+    });
+  }
+
+  if (url.pathname === "/api/ava-chat" || url.pathname === "/api/ava-fast-chat") {
+    const input = req.method === "POST" ? await readJson(req) : {};
+    const message = typeof input.message === "string" ? input.message : "";
+
+    return sendJson(res, 200, {
+      ...baseStatus(),
+      route: url.pathname,
+      mode: "owner_pilot_guarded_response",
+      response: [
+        "AVA is online in owner-pilot mode.",
+        "The public route and Railway backend are connected.",
+        "Advanced intelligence, customer memory, file retrieval, device/code bank, payments, voice, follow-up, and hardware control remain gated until owner approval.",
+        message
+          ? `Received test message: ${message}`
+          : "No message was provided in this test request."
+      ].join(" "),
+      answer: "AVA is online in owner-pilot mode. Advanced features remain gated until owner approval.",
+      public_chat_active: process.env.AVA_ENABLE_PUBLIC_CHAT === "true",
+      hardware_control: false
     });
   }
 
@@ -86,11 +126,14 @@ function route(req, res) {
     ok: false,
     error: "route_not_found",
     path: url.pathname,
+    hardware_control: false,
     available_routes: [
       "/api/ava-health",
       "/api/ava-readiness",
       "/api/ava-live-proof",
-      "/api/ava-visual-status"
+      "/api/ava-visual-status",
+      "/api/ava-chat",
+      "/api/ava-fast-chat"
     ]
   });
 }
