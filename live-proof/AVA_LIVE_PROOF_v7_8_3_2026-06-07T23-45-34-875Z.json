@@ -1,0 +1,207 @@
+{
+  "ok": true,
+  "version": "7.8.4",
+  "collectedAt": "2026-06-07T23:45:33.439Z",
+  "publicUrl": "https://mtthorne.com/AV/AVA",
+  "backendUrl": "https://ava-backend-production-734e.up.railway.app",
+  "checks": {
+    "publicPage": {
+      "status": 200,
+      "ok": true,
+      "hasAva": true,
+      "hasCanonical": true,
+      "hasContinuation": true
+    },
+    "ava-health": {
+      "status": 200,
+      "ok": true,
+      "json": {
+        "ok": true,
+        "service": "ava-backend",
+        "ai": "AVA / AV.AI",
+        "status": {
+          "state": "owner_pilot_backend_online",
+          "mode": "owner_pilot",
+          "railwayRuntime": true,
+          "databaseConfigured": false,
+          "ownerTokenConfigured": true,
+          "publicBaseUrl": "https://mtthorne.com/AV/AVA",
+          "publicChatEnabled": false,
+          "customerDataEnabled": false,
+          "fileRetrievalEnabled": false,
+          "codeBankEnabled": false,
+          "voiceEnabled": false,
+          "realtimeVoiceEnabled": false,
+          "followupDraftsEnabled": false,
+          "paymentAllowed": false,
+          "hardwareControlAllowed": false
+        },
+        "route": "/api/ava-health",
+        "message": "AVA backend is online. Advanced features remain gated until owner approval."
+      }
+    },
+    "ava-readiness": {
+      "status": 200,
+      "ok": true,
+      "json": {
+        "ok": true,
+        "service": "ava-backend",
+        "ai": "AVA / AV.AI",
+        "readiness": "pilot_ready",
+        "status": {
+          "state": "owner_pilot_backend_online",
+          "mode": "owner_pilot",
+          "railwayRuntime": true,
+          "databaseConfigured": false,
+          "ownerTokenConfigured": true,
+          "publicBaseUrl": "https://mtthorne.com/AV/AVA",
+          "publicChatEnabled": false,
+          "customerDataEnabled": false,
+          "fileRetrievalEnabled": false,
+          "codeBankEnabled": false,
+          "voiceEnabled": false,
+          "realtimeVoiceEnabled": false,
+          "followupDraftsEnabled": false,
+          "paymentAllowed": false,
+          "hardwareControlAllowed": false
+        },
+        "gated_features": {
+          "public_chat": false,
+          "customer_data": false,
+          "private_files": false,
+          "device_code_bank": false,
+          "voice": false,
+          "payments": false,
+          "hardware_control": false,
+          "automatic_followup": false
+        }
+      }
+    },
+    "ava-live-proof": {
+      "status": 200,
+      "ok": true,
+      "json": {
+        "ok": true,
+        "service": "ava-backend",
+        "ai": "AVA / AV.AI",
+        "proof": {
+          "railwayBackendResponding": true,
+          "publicRouteExpected": "https://mtthorne.com/AV/AVA",
+          "timestamp": "2026-06-07T23:49:25.951Z",
+          "publicChatEnabled": false,
+          "customerDataEnabled": false,
+          "fileRetrievalEnabled": false,
+          "codeBankEnabled": false,
+          "voiceEnabled": false,
+          "realtimeVoiceEnabled": false,
+          "followupDraftsEnabled": false,
+          "paymentAllowed": false,
+          "hardwareControlAllowed": false
+        },
+        "note": "This proves the Railway backend is reachable. It does not prove full AVA activation."
+      }
+    },
+    "ava-visual-status": {
+      "status": 200,
+      "ok": true,
+      "json": {
+        "ok": true,
+        "service": "ava-backend",
+        "ai": "AVA / AV.AI",
+        "visual": {
+          "ownerUploadRequired": true,
+          "publicUseAllowed": true,
+          "visibleBeingState": "pending_owner_upload",
+          "ownerApproved": false,
+          "assetUrl": null
+        },
+        "status": {
+          "state": "owner_pilot_backend_online",
+          "mode": "owner_pilot",
+          "railwayRuntime": true,
+          "databaseConfigured": false,
+          "ownerTokenConfigured": true,
+          "publicBaseUrl": "https://mtthorne.com/AV/AVA",
+          "publicChatEnabled": false,
+          "customerDataEnabled": false,
+          "fileRetrievalEnabled": false,
+          "codeBankEnabled": false,
+          "voiceEnabled": false,
+          "realtimeVoiceEnabled": false,
+          "followupDraftsEnabled": false,
+          "paymentAllowed": false,
+          "hardwareControlAllowed": false
+        }
+      }
+    },
+    "publicChat": {
+      "status": 200,
+      "ok": true,
+      "json": {
+        "ok": true,
+        "service": "ava-backend",
+        "ai": "AVA / AV.AI",
+        "route": "/api/ava-chat",
+        "mode": "owner_pilot_guarded_response",
+        "received_message": "What does AV mean?",
+        "answer": "Direct answer: AVA is online in owner-pilot mode, and the Railway backend is connected to the public AVA route.\n\nWhy it matters: this proves the deployment channel is working while keeping customer data, file retrieval, device/code bank access, payments, voice, follow-up automation, and hardware control safely gated.\n\nSafest next step: continue testing AVA through owner-approved prompts first, then activate advanced features one at a time only after storage, audit, and owner approval are verified.",
+        "response": "Direct answer: AVA is online in owner-pilot mode, and the Railway backend is connected to the public AVA route.\n\nWhy it matters: this proves the deployment channel is working while keeping customer data, file retrieval, device/code bank access, payments, voice, follow-up automation, and hardware control safely gated.\n\nSafest next step: continue testing AVA through owner-approved prompts first, then activate advanced features one at a time only after storage, audit, and owner approval are verified.",
+        "status": {
+          "state": "owner_pilot_backend_online",
+          "mode": "owner_pilot",
+          "railwayRuntime": true,
+          "databaseConfigured": false,
+          "ownerTokenConfigured": true,
+          "publicBaseUrl": "https://mtthorne.com/AV/AVA",
+          "publicChatEnabled": false,
+          "customerDataEnabled": false,
+          "fileRetrievalEnabled": false,
+          "codeBankEnabled": false,
+          "voiceEnabled": false,
+          "realtimeVoiceEnabled": false,
+          "followupDraftsEnabled": false,
+          "paymentAllowed": false,
+          "hardwareControlAllowed": false
+        }
+      }
+    },
+    "ownerNoToken": {
+      "status": 403,
+      "ok": false,
+      "json": {
+        "ok": false,
+        "service": "ava-backend",
+        "error": "owner_token_required",
+        "message": "Owner-only AVA route rejected the request because a valid owner token was not supplied.",
+        "status": {
+          "state": "owner_pilot_backend_online",
+          "mode": "owner_pilot",
+          "railwayRuntime": true,
+          "databaseConfigured": false,
+          "ownerTokenConfigured": true,
+          "publicBaseUrl": "https://mtthorne.com/AV/AVA",
+          "publicChatEnabled": false,
+          "customerDataEnabled": false,
+          "fileRetrievalEnabled": false,
+          "codeBankEnabled": false,
+          "voiceEnabled": false,
+          "realtimeVoiceEnabled": false,
+          "followupDraftsEnabled": false,
+          "paymentAllowed": false,
+          "hardwareControlAllowed": false
+        }
+      }
+    }
+  },
+  "notes": [
+    "Owner token not supplied; owner-acceptance proof still pending."
+  ],
+  "gated": {
+    "customerDataEnabled": false,
+    "fileRetrievalEnabled": false,
+    "codeBankEnabled": false,
+    "voiceEnabled": false,
+    "hardwareControlAllowed": false,
+    "paymentAllowed": false
+  }
+}

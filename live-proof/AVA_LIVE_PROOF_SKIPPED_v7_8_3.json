@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "version": "7.8.4",
+  "collectedAt": "2026-06-07T19:54:09.391Z",
+  "publicUrl": "",
+  "backendUrl": "",
+  "checks": {},
+  "notes": [
+    "Set AVA_PUBLIC_VERIFY_URL and AVA_BACKEND_VERIFY_URL before collecting live proof."
+  ],
+  "skipped": true
+}
