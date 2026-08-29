@@ -9,6 +9,7 @@ must('rules include fiber transport coupling', /Fiber-distance rule/.test(AVA_TE
 must('rules include video conversion mechanism caution', /Video-conversion rule/.test(AVA_TECHNICAL_RULES_V2));
 must('rules include 70V impedance interpretation', /70V impedance rule/.test(AVA_TECHNICAL_RULES_V2));
 must('rules distinguish DMM DC resistance from AC load', /digital multimeter reading.*DC resistance/i.test(AVA_TECHNICAL_RULES_V2));
+must('rules include RF polarization guidance', /RF polarization rule/.test(AVA_TECHNICAL_RULES_V2));
 must('rules include local speech reinforcement caution', /Local speech reinforcement rule/.test(AVA_TECHNICAL_RULES_V2));
 
 const p13 = applyAvaTechnicalSafetyV2(
@@ -49,6 +50,13 @@ const p28 = applyAvaTechnicalSafetyV2(
 must('P28 DMM resistance is not converted to operating watts', /Do not calculate 70V operating wattage/i.test(p28) && /DMM measures DC resistance/i.test(p28));
 must('P28 requires AC load method before safety conclusion', /impedance meter\/bridge|manufacturer-approved distributed-line test method/i.test(p28) && /do not declare the line safe or overloaded from DCR alone/i.test(p28));
 
+const p35 = applyAvaTechnicalSafetyV2(
+  'Our IEM transmitters feed a passive directional helical antenna. Performers lose audio when they turn their heads or move sideways even though RF level looks high.',
+  'This is a polarization mismatch. The circular helical and linear beltpack whip go 90 degrees out of phase when the performer turns, causing a 20 dB null. Replace the helical with a dual-polarized linear antenna.'
+);
+must('P35 circular-to-linear orientation hallucination corrected', /Circular polarization is used specifically to reduce orientation-dependent polarization fading/i.test(p35));
+must('P35 keeps helical in diagnostic baseline', /keep the helical in the diagnostic baseline/i.test(p35) && /multipath\/fading zones|multipath/i.test(p35));
+
 const safeFiber = 'This is a 10GBASE-SR OM3 link at 250 m, which is within the supported design distance; verify optics and cleanliness next.';
 must('safe fiber answer is not rewritten', applyAvaTechnicalSafetyV2('10GBASE-SR OM3 link at 250 m', safeFiber) === safeFiber);
 
@@ -57,5 +65,8 @@ must('safe 70V answer is not rewritten', applyAvaTechnicalSafetyV2('70V amplifie
 
 const safeDmm = 'A standard multimeter reads DC resistance, not the operating AC impedance of a transformer-coupled 70V line. Do not calculate wattage from the 4.2-ohm DCR; verify tap totals or use the approved AC load measurement method.';
 must('correct DMM/70V explanation is not rewritten', applyAvaTechnicalSafetyV2('70V speaker line measures 4.2 ohms on a digital multimeter', safeDmm) === safeDmm);
+
+const safeIem = 'A circularly polarized helical antenna is intentionally tolerant of a moving linear beltpack whip. Check multipath, body shadowing, coax/antenna faults, interference, coverage geometry, and beltpack diversity before changing antenna type.';
+must('correct helical/IEM explanation is not rewritten', applyAvaTechnicalSafetyV2('IEM performers move around while receiving from a helical antenna', safeIem) === safeIem);
 
 console.log('AVA technical safety V2 self-test passed.');
