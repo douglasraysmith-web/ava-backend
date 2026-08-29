@@ -5,6 +5,7 @@ export const AVA_TECHNICAL_RULES_V2 = [
   'Video-conversion rule: a format limit does not prove a frame-drop mechanism. A working 4K-to-1080p hardware down-converter should normally output a continuous supported raster/frame rate. For choppy USB-conference capture, trace converter output, capture-device capability, negotiated USB 3.x vs USB 2.0 mode, cabling/hubs, compression mode, host bandwidth, and application frame rate before replacing the SDI converter.',
   '70V impedance rule: distinguish DC resistance from AC impedance/load. A standard digital multimeter reading on a transformer-coupled 70V/100V speaker line is DC resistance and must not be inserted into P = V^2/R to calculate operating wattage. Use transformer-tap totals and the manufacturer-approved AC impedance/load method or an impedance meter/bridge at an appropriate test frequency. A true conductor short trends toward near-zero resistance, but low DCR alone on a transformer-coupled line does not prove either a short or an operating wattage.',
   '70V equivalent-load rule: only when the measured value is a valid AC equivalent impedance/load may V^2/Z be used as an approximation. For example, 12.5 ohms as a valid 70V AC equivalent load is about 392 W; do not apply that calculation to an ordinary DMM DC-resistance reading.',
+  'RF polarization rule: a circularly polarized transmit antenna such as a helical is deliberately tolerant of orientation changes in a linear whip receiver; do not diagnose head/body rotation dropouts as a simple 90-degree polarization null caused by the helical. For moving IEM beltpacks, investigate multipath, body shadowing, antenna/feedline faults, coverage geometry, RF overload/desense, local interference, and receiver/transmitter health before replacing a circularly polarized antenna.',
   'Local speech reinforcement rule: in council/boardroom seating, do not route a nearby neighbor microphone into the overhead loudspeaker above adjacent listeners as the default fix for poor adjacent-seat audibility. First check natural acoustic path, furniture/sightline obstruction, microphone placement, automixer/gating threshold, gain structure, and zone/mix-minus logic; avoid creating a local acoustic feedback loop.'
 ].join('\n');
 
@@ -71,6 +72,18 @@ export function applyAvaTechnicalSafetyV2(message='', answer='') {
       'Why it matters: if 12.5 ohms is a valid AC equivalent load, P = V²/Z gives about 392 W at 70 V nominal. That can overload an amplifier rated below that load. A true conductor-to-conductor short trends toward near-zero resistance, so 12.5 ohms by itself does not prove a copper short.',
       'Safest next step: first establish whether the measurement is a valid AC impedance/load measurement rather than DMM DC resistance; then confirm the amplifier rating/output mode, sum all transformer taps, compare expected load to the measured value, and isolate branches if needed.',
       'Verification: transformer-coupled distributed lines require the correct load-measurement method; do not substitute DCR for AC impedance.'
+    ].join('\n\n');
+  }
+
+  const iemPolarizationCase = /(iem|in-ear|beltpack|helical|circular polar|polarization|wireless monitor)/i.test(q);
+  const blamesCircularMismatch = /(polarization mismatch|90\s*(?:degree|degrees|°)|out of phase|linear antenna)[\s\S]{0,160}(helical|circular)|(helical|circular)[\s\S]{0,160}(polarization mismatch|90\s*(?:degree|degrees|°)|out of phase|linear antenna)/i.test(a);
+  const replaceHelical = /(replace|swap)[\s\S]{0,100}(helical|circular)[\s\S]{0,100}(antenna)/i.test(a);
+  if (iemPolarizationCase && (blamesCircularMismatch || replaceHelical)) {
+    return [
+      'Direct answer: Do not blame the helical antenna simply because the performer turns or tilts a linear-whip beltpack. Circular polarization is used specifically to reduce orientation-dependent polarization fading with a moving linear receiver.',
+      'Why it matters: a circularly polarized field does not create the same deep 90-degree orientation null that occurs between two fixed orthogonal linear polarizations. A linear receiver does incur a polarization-coupling loss relative to a perfectly matched circular receiver, but rotating that linear whip is not expected to produce the claimed orientation-specific collapse.',
+      'Safest next step: keep the helical in the diagnostic baseline and check multipath/fading zones, performer body shadowing, antenna and coax/feedline integrity, antenna placement/coverage geometry, transmitter combining and power, RF overload/desense, local interference, and the affected beltpacks themselves.',
+      'Verification: compare dropouts at fixed locations and with known-good beltpacks/antennas, inspect RF scans and diversity indicators where available, and only change antenna topology after the failure mechanism is demonstrated.'
     ].join('\n\n');
   }
 
