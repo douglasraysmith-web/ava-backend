@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node --import ./ava-technical-safety-preload.mjs server.mjs",
     "check": "node --check server.mjs && node --check ava-technical-safety-preload.mjs && node --check scripts/ava-technical-safety-self-test.mjs",
-    "test": "node scripts/ava-technical-safety-self-test.mjs && node server.mjs --self-test"
+    "test": "node scripts/ava-technical-safety-self-test.mjs && node --import ./ava-technical-safety-preload.mjs server.mjs --self-test"
   },
   "dependencies": {}
 }
