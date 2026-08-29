@@ -22,6 +22,10 @@ export function applyAvaTechnicalSafetyV8(message='', answer='') {
   const q=String(message||'');
   const a=String(answer||'');
 
+  // Lubricant compatibility must take precedence over the broad Category-cable pull guard.
+  if (/(cat\s*6|cat6a|category cable|conduit|emt|fmc|pull)/i.test(q) && /(petroleum grease|automotive petroleum|automotive grease)/i.test(a))
+    return 'Technical correction: Use only manufacturer-approved, cable-compatible pulling lubricant. Petroleum grease can attack some communications-cable jackets and does not improve data speed. Lubricant does not waive conduit fill, bend-radius, pull-box, or cable-damage limits.';
+
   if (/(cat\s*6|cat6a|category cable|pull|kink|snag|zip[- ]?tie|sharp concrete corner)/i.test(q) && /(440\s*lbf|300\s*lbf|150\s*lbf|hammer|bite|flatten|strain harden|recrystall|improves? speed|doubles? headroom)/i.test(a))
     return 'Technical correction: Do not scale Category-cable pulling tension by bundle count or force a snag/kink with a winch, hammer, or over-tight tie. Respect the cable manufacturer/TIA pulling-tension and bend-radius limits. Damaged cable should be replaced or certification-tested rather than mechanically flattened.';
 
@@ -83,7 +87,7 @@ export function applyAvaTechnicalSafetyV8(message='', answer='') {
     return 'Technical correction: Passive coax splitters add insertion loss and do not clean or amplify a signal. A plain series copper splice is not a ground-loop isolator.';
 
   if (/(45\s*kg|25\s*kg|30\s*kg|65\s*kg|projector lift|display.*drywall|gypsum ceiling)/i.test(q) && /(plastic|toggle|gravity.*zero|pure lateral shear|horizontal shear|motion cancels gravity|safe because)/i.test(a))
-    return 'Safety correction: Heavy wall/ceiling-mounted equipment imposes real shear, pull-out/tension, moment and dynamic loads. Unsupported gypsum is not structural support; verify structural framing, mount rating and dynamic loads.';
+    return 'Safety correction: A heavy wall/ceiling-mounted display, projector, or lift imposes real shear, pull-out/tension, moment and dynamic loads. Unsupported gypsum is not structural support; verify structural framing, mount rating and dynamic loads.';
 
   if (/(projector|projection mapping|dome|chandelier|disco ball)/i.test(q) && /(parabolic spiral|line[- ]double|1080p.*4k|self-correct|automatically correct|refract.*inward)/i.test(a))
     return 'Technical correction: Align to the actual screen/target geometry and use appropriate optics and mesh warping. Chandeliers, disco balls and curved plaster do not increase source resolution or self-correct geometry.';
