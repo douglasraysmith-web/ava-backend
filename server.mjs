@@ -119,15 +119,13 @@ function avaSystemPrompt() {
 function avaTechnicalSafetyGuard(message, answer) {
   const q = String(message || "");
   const a = String(answer || "");
-  const qLower = q.toLowerCase();
   const aLower = a.toLowerCase();
 
   const distributedAudio = /(?:\b70\s*v\b|\b100\s*v\b|constant[-\s]?voltage|distributed audio)/i.test(q);
-  const protectionFault = /(shutdown|shut down|protection|protect mode|trip|overheat|overload|fault|short)/i.test(q);
+  const protectionFault = /(shutdown|shut down|shutting down|protection|protect mode|trip|overheat|overload|fault|short)/i.test(q);
   const powerUpgrade = /(larger|bigger|higher[-\s]?power|more powerful|750\s*w|upgrade)[\s\S]{0,80}(amp|amplifier)|(amp|amplifier)[\s\S]{0,80}(larger|bigger|higher[-\s]?power|more powerful|750\s*w|upgrade)/i.test(a);
-  const faultIsolation = /(short|ground fault|transformer tap|tap load|wiring|damaged cable|voltage drop|protection|load calculation|aggregate load|disconnect.*branch|isolate.*branch)/i.test(a);
 
-  if (distributedAudio && protectionFault && powerUpgrade && !faultIsolation) {
+  if (distributedAudio && protectionFault && powerUpgrade) {
     return [
       "Direct answer: Do not increase amplifier power yet. A 70V/100V amplifier that is shutting down or entering protection needs the fault/load condition isolated first.",
       "Why it matters: normal line resistance causes voltage drop and less power at the loudspeakers; it does not create extra wattage demand that is cured by a larger amplifier. An unexplained shutdown can indicate a short/ground fault, incorrect transformer tap wiring, excessive total tap load, damaged cable or loudspeaker transformer, output wiring error, overheating, or another protection condition.",
