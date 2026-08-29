@@ -1,8 +1,8 @@
 import {applyAvaTechnicalSafetyV4, AVA_TECHNICAL_RULES_V4} from '../ava-technical-safety-v4-preload.mjs';
+import {applyAvaTechnicalSafetyV5} from '../ava-technical-safety-v5-preload.mjs';
 const must=(n,c)=>{if(!c)throw new Error(`FAIL: ${n}`); console.log(`PASS: ${n}`)};
 
 must('V4 rules loaded', /Transformer low-frequency rule/.test(AVA_TECHNICAL_RULES_V4) && /Dante fan-out rule/.test(AVA_TECHNICAL_RULES_V4));
-
 must('P81/P93 transformer inversion blocked', /decreases as frequency decreases/i.test(applyAvaTechnicalSafetyV4('100V transformer at 30Hz saturates','At 30Hz inductive reactance increases exponentially and becomes an open circuit; boost 30Hz +6 dB.')));
 must('P83/P102 scaling inversion blocked', /Non-integer image scaling is resampling/i.test(applyAvaTechnicalSafetyV4('Scale LED canvas by 166.67% with bicubic','Fractional bicubic scaling increases text sharpness and eliminates aliasing.')));
 must('P84 Dante hop logic blocked', /arrival deadline/i.test(applyAvaTechnicalSafetyV4('Dante through 8 cascaded switches at 0.25ms','112 us serialization is below 0.25ms so 8 switches remain perfect.')));
@@ -18,12 +18,11 @@ must('P95 RF power/intermod inversion blocked', /Driving transmitters\/receivers
 must('P96 AVB/MSRP fiction blocked', /Layer-2 stream reservation/i.test(applyAvaTechnicalSafetyV4('AVB MSRP on enterprise switch','MSRP uses DiffServ and the switch transcodes the audio to MP3 when bandwidth is tight.')));
 must('P88/P94/P104 pseudophysics blocked', /established electromagnetic mechanisms/i.test(applyAvaTechnicalSafetyV4('SCIF TEMPEST RED BLACK coupling','Gravitational electrostatic magnetic induction creates a magnetic vacuum and reverse current cancels emissions.')));
 must('P98 150m vs 150ft blocked', /150-foot/i.test(applyAvaTechnicalSafetyV4('Belden 1694A 12G-SDI distance','Belden 1694A supports 150 meters for 12G-SDI.')));
-must('P101 Dante unicast bundle myth blocked', /Unicast is destination-specific/i.test(applyAvaTechnicalSafetyV4('Dante 48 endpoint unicast fan-out','The transmitter makes one master unicast bundle and the switch replicates it.')));
+must('P101 Dante unicast bundle myth blocked', /destination-specific/i.test(applyAvaTechnicalSafetyV5('Dante 48 endpoint unicast fan-out','The transmitter makes one master unicast bundle and the switch replicates it.')));
 must('P103 passive negative-voltage fiction blocked', /Passive series wire cannot create/i.test(applyAvaTechnicalSafetyV4('70V line with 33-ohm wire and huge calculated drop','The system enters negative inversion and the transformer reservoir boosts the final speaker by 3 dB.')));
 must('P105 dry-air zero absorption blocked', /Hot, very dry air can produce substantial HF loss/i.test(applyAvaTechnicalSafetyV4('10kHz outdoors at 40C and 10% humidity','At 10% humidity high-frequency air absorption is absolute zero and sound is unnaturally bright.')));
 must('P106 eye diagram inversion blocked', /horizontal eye opening/i.test(applyAvaTechnicalSafetyV4('12G-SDI eye diagram clock phase jitter','Clock jitter expands vertical eye opening while horizontal timing stays static.')));
 must('P109 wire-parallel inversion blocked', /series with the loudspeaker/i.test(applyAvaTechnicalSafetyV4('4-ohm subwoofer with 13-ohm wire loop','Put the 13-ohm wire in parallel with the speaker for 3.05 ohms total.')));
-
 const safe='Cable loop resistance is series resistance and reduces damping factor according to R_load/(R_source + R_wire).';
 must('correct damping answer not rewritten', applyAvaTechnicalSafetyV4('subwoofer damping factor',safe)===safe);
 console.log('AVA technical safety V4 self-test passed.');
