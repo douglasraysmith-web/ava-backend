@@ -13,6 +13,7 @@ export const AVA_TECHNICAL_RULES_V7 = [
   'DC lighting rule: voltage drop on LED tape does not create an inverted brightness surge. Verify conductor resistance, current, injection points and strip/controller voltage limits; low voltage generally reduces available LED current/output.',
   'Thermal management rule: sealed plastic enclosures trap heat, blocked exhaust prevents cooling, and recirculating hot exhaust cannot create refrigeration. Fan pressure does not grow exponentially by stacking identical axial fans. Provide a real intake-to-exhaust heat path and verify equipment ambient limits.',
   'EMI/separation rule: unbalanced audio or communications cabling routed tightly with mains conductors is susceptible to capacitive/inductive coupling and may violate code/separation requirements. Floating foil, coils, tight braids or zip ties do not create magical self-shielding.',
+  'Magnetostatics rule: ordinary plaster/wood are not magnetic flux amplifiers and a static magnet does not permanently polarize copper or reverse digital-data propagation. Use magnets only as mechanical locating/fishing aids within safe field practice.',
   'Optics/glare rule: rotating a display, applying gloss/mirror coatings, sunlight, magnets or degaussing do not rearrange LCD pixels or eliminate front-surface glare. Treat glare with geometry, shading, luminance/contrast analysis and appropriate anti-glare/AR approaches; glass ghosting is reflection/refraction, not magnetic molecular realignment.',
   'Display thermal rule: strong solar load can overheat displays and LCDs; heat does not improve contrast through isotropic clearing. Verify manufacturer temperature limits, shading/ventilation and solar load.',
   'IR remote rule: strong sunlight can saturate an IR receiver/noise floor while the remote wavelength remains essentially unchanged. Diagnose receiver saturation/geometry, not fictional wavelength conversion or reverse photons.',
@@ -44,6 +45,10 @@ function addRules(payload={}) {
 export function applyAvaTechnicalSafetyV7(message='', answer='') {
   const q = String(message || '');
   const a = String(answer || '');
+
+  if (/(magnet|magnetic|plaster|lath|fish.*cable|copper)/i.test(q) && /(flux.*(?:4x|amplif|multipl)|polariz.*copper|reverse.*data|data.*reverse|magnetic.*reorgan)/i.test(a)) {
+    return 'Technical correction: Ordinary plaster and wood do not amplify a fishing magnet into a data-control field. A static magnet does not permanently polarize copper or reverse digital-data propagation. Treat the magnet only as a locating/fishing aid and protect cable geometry and nearby equipment.';
+  }
 
   if (/(cat\s*6|cat6a|category cable|pre-wire|pull|kink|zip[- ]?tie|snag)/i.test(q) && /(440\s*lbf|300\s*lbf|150\s*lbf|multiply.*tension|hammer.*kink|bite.*cable|crush.*pair|molecular.*recrystall|25.*per cable)/i.test(a)) {
     return 'Technical correction: Do not scale Category-cable pulling tension by bundle count or force a snag/kink with a winch, hammer, or over-tight tie. Respect the cable manufacturer/TIA pulling-tension and bend-radius limits, stop and clear the obstruction, and preserve the twisted-pair geometry. Damaged cable should be replaced or certification-tested rather than mechanically flattened.';
