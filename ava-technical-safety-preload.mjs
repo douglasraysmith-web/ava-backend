@@ -3,7 +3,8 @@ const originalFetch = globalThis.fetch;
 export const AVA_TECHNICAL_RULES_V2 = [
   'Fiber-distance rule: never state a multimode fiber distance limit from fiber category alone. Tie the limit to the actual Ethernet/transport standard, data rate, optics/transceiver type, wavelength, and link budget. Example: OM3 may be about 300 m for 10GBASE-SR but can reach about 550 m for 1000BASE-SX with supported optics; diagnose the actual link before blaming length.',
   'Video-conversion rule: a format limit does not prove a frame-drop mechanism. A working 4K-to-1080p hardware down-converter should normally output a continuous supported raster/frame rate. For choppy USB-conference capture, trace converter output, capture-device capability, negotiated USB 3.x vs USB 2.0 mode, cabling/hubs, compression mode, host bandwidth, and application frame rate before replacing the SDI converter.',
-  '70V impedance rule: a resistance/impedance reading must be interpreted against expected line load and amplifier rating. V^2/R can estimate equivalent power for a resistive approximation, but a direct copper short trends toward near-zero resistance, not a moderate value such as 12.5 ohms. On a nominal 70 V line, 12.5 ohms corresponds to roughly 392 W by 4900/12.5; that may overload a 200 W or 300 W amplifier and is not automatically a healthy line.',
+  '70V impedance rule: distinguish DC resistance from AC impedance/load. A standard digital multimeter reading on a transformer-coupled 70V/100V speaker line is DC resistance and must not be inserted into P = V^2/R to calculate operating wattage. Use transformer-tap totals and the manufacturer-approved AC impedance/load method or an impedance meter/bridge at an appropriate test frequency. A true conductor short trends toward near-zero resistance, but low DCR alone on a transformer-coupled line does not prove either a short or an operating wattage.',
+  '70V equivalent-load rule: only when the measured value is a valid AC equivalent impedance/load may V^2/Z be used as an approximation. For example, 12.5 ohms as a valid 70V AC equivalent load is about 392 W; do not apply that calculation to an ordinary DMM DC-resistance reading.',
   'Local speech reinforcement rule: in council/boardroom seating, do not route a nearby neighbor microphone into the overhead loudspeaker above adjacent listeners as the default fix for poor adjacent-seat audibility. First check natural acoustic path, furniture/sightline obstruction, microphone placement, automixer/gating threshold, gain structure, and zone/mix-minus logic; avoid creating a local acoustic feedback loop.'
 ].join('\n');
 
@@ -26,7 +27,7 @@ export function applyAvaTechnicalSafetyV2(message='', answer='') {
   const a = String(answer || '');
 
   const distributedAudio = /(?:\b70\s*v\b|\b100\s*v\b|constant[-\s]?voltage|distributed audio|speaker line)/i.test(q);
-  const protectionFault = /(shutdown|shut down|protection|protect mode|trip|overheat|overload|fault|red fault|short)/i.test(q);
+  const protectionFault = /(shutdown|shut down|shutting down|protection|protect mode|trip|overheat|overload|fault|red fault|short)/i.test(q);
   const powerUpgrade = /(larger|bigger|higher[-\s]?power|more powerful|750\s*w|upgrade)[\s\S]{0,100}(amp|amplifier)|(amp|amplifier)[\s\S]{0,100}(larger|bigger|higher[-\s]?power|more powerful|750\s*w|upgrade)/i.test(a);
 
   if (distributedAudio && protectionFault && powerUpgrade) {
@@ -50,15 +51,26 @@ export function applyAvaTechnicalSafetyV2(message='', answer='') {
     return `${a}\n\nTechnical correction: A properly functioning hardware down-converter does not normally create a slideshow merely because the input is 4K and the output path is 1080p. Verify the converter's supported conversion mode, then trace the USB capture path: capture-device limits, negotiated USB 3.x versus USB 2.0 mode, cable/hub quality, compression format, host bandwidth, and Teams/application frame-rate reporting before replacing the SDI converter.`;
   }
 
-  const impedanceCase = distributedAudio && /(12\.5\s*(?:ohm|ω)|impedance|resistance|ohm's law|ohms law)/i.test(q);
+  const dmmDcCase = distributedAudio && /(multimeter|digital multimeter|\bdmm\b|dc resistance|resistance reading)/i.test(q);
+  const dmmUsedForWatts = /(v\s*[²^2]\s*\/\s*r|ohm'?s law|4900\s*\/|will draw|draws?|watt|watts)/i.test(a);
+  if (dmmDcCase && dmmUsedForWatts) {
+    return [
+      'Direct answer: Do not calculate 70V operating wattage from that ordinary multimeter resistance reading.',
+      'Why it matters: a standard DMM measures DC resistance. A transformer-coupled 70V/100V loudspeaker line presents a frequency-dependent AC impedance/load in operation, so its DC resistance can be much lower and is not the value to insert into P = V²/R for operating wattage.',
+      'Safest next step: verify the intended transformer tap total, amplifier rating/output mode, and line wiring. If an electrical load measurement is required, use the manufacturer-approved distributed-line test method or an appropriate impedance meter/bridge at the specified test frequency. Investigate a suspected short separately rather than inferring it from wattage calculated from DCR.',
+      'Verification: keep the line de-energized while testing resistance, follow manufacturer procedures, and do not declare the line safe or overloaded from DCR alone.'
+    ].join('\n\n');
+  }
+
+  const impedanceCase = distributedAudio && /(12\.5\s*(?:ohm|ω)|impedance|resistance|ohm's law|ohms law)/i.test(q) && !dmmDcCase;
   const saysHealthy = /(healthy|perfectly functioning|normal load)/i.test(a);
   const saysDirectShort = /(direct|copper|hard)[\s\S]{0,30}short|short circuit/i.test(a);
   if (impedanceCase && (saysHealthy || saysDirectShort)) {
     return [
-      'Direct answer: Treat a 12.5-ohm reading on a nominal 70V speaker line as a potentially heavy load, not as proof of a healthy line or proof of a direct copper short.',
-      'Why it matters: using the resistive approximation P = V²/R, 70²/12.5 is about 392 W. That can overload an amplifier rated below that load. A true conductor-to-conductor short trends toward near-zero resistance, so 12.5 ohms by itself does not prove a copper short.',
-      'Safest next step: confirm the amplifier rating/output mode, sum all transformer taps, compare expected equivalent load to the measured value, then isolate the newly added branch and other zones to determine whether the fault follows a branch, tap setting, transformer/speaker, or wiring defect.',
-      'Verification: resistance measurements on transformer-coupled distributed lines are diagnostic clues, not a substitute for the manufacturer load method or proper impedance/load testing.'
+      'Direct answer: Treat a 12.5-ohm valid AC equivalent load on a nominal 70V speaker line as potentially heavy, not as proof of a healthy line or proof of a direct copper short.',
+      'Why it matters: if 12.5 ohms is a valid AC equivalent load, P = V²/Z gives about 392 W at 70 V nominal. That can overload an amplifier rated below that load. A true conductor-to-conductor short trends toward near-zero resistance, so 12.5 ohms by itself does not prove a copper short.',
+      'Safest next step: first establish whether the measurement is a valid AC impedance/load measurement rather than DMM DC resistance; then confirm the amplifier rating/output mode, sum all transformer taps, compare expected load to the measured value, and isolate branches if needed.',
+      'Verification: transformer-coupled distributed lines require the correct load-measurement method; do not substitute DCR for AC impedance.'
     ].join('\n\n');
   }
 
