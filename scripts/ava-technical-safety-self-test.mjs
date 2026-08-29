@@ -41,4 +41,10 @@ const p10 = applyAvaTechnicalSafetyV2(
 );
 must('P10 mixed diagnose-then-upsize still blocked', !/then upgrade to a larger 750W amplifier/i.test(p10) && /Do not increase amplifier power/i.test(p10));
 
+const safeFiber = 'This is a 10GBASE-SR OM3 link at 250 m, which is within the supported design distance; verify optics and cleanliness next.';
+must('safe fiber answer is not rewritten', applyAvaTechnicalSafetyV2('10GBASE-SR OM3 link at 250 m', safeFiber) === safeFiber);
+
+const safe70V = 'The 70V amplifier is in protection. Sum transformer taps, isolate branches, and verify wiring before changing amplifier size.';
+must('safe 70V answer is not rewritten', applyAvaTechnicalSafetyV2('70V amplifier is in protection', safe70V) === safe70V);
+
 console.log('AVA technical safety V2 self-test passed.');
