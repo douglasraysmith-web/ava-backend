@@ -37,7 +37,7 @@ export function applyAvaTechnicalSafetyV6(message='', answer='') {
     return 'Technical correction: Skin effect concentrates high-frequency current density toward the conductor surface, increasing effective AC resistance. CTLE is an analog equalizer that emphasizes/restores attenuated high-frequency content, while DFE is a decision-feedback equalizer that uses prior symbol decisions to cancel post-cursor ISI. Do not invert those mechanisms.';
   }
 
-  if (/(aes67|48\s*khz|250\s*(?:us|μs|microsecond)|ptpv1|ptpv2)/i.test(q) && /(120\s*samples|header compression|compress.*ptp|map.*ptpv2.*ptpv1|unmanaged.*translat)/i.test(a)) {
+  if (/(aes67|48\s*khz|250\s*(?:us|μs|microsecond)|ptpv1|ptpv2)/i.test(q) && /(120\s*samples|header compression|compress.*ptp|map.*ptpv2.*ptpv1|(?:let|have|use)\s+(?:the\s+)?unmanaged[\s\S]{0,80}translat|unmanaged[\s\S]{0,80}(?:will|can|does|automatically)\s+translat)/i.test(a)) {
     return 'Technical correction: AES67 packet payload is sample rate multiplied by packet time. At 48 kHz and 250 microseconds, 48,000 × 0.000250 = 12 samples per packet, not 120. An unmanaged switch does not translate or compress PTPv1/PTPv2 timing profiles; use compatible timing profiles or an explicitly designed boundary/bridge.';
   }
 
