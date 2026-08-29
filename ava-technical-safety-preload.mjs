@@ -52,7 +52,7 @@ export function applyAvaTechnicalSafetyV2(message='', answer='') {
   }
 
   const dmmDcCase = distributedAudio && /(multimeter|digital multimeter|\bdmm\b|dc resistance|resistance reading)/i.test(q);
-  const dmmUsedForWatts = /(v\s*[²^2]\s*\/\s*r|ohm'?s law|4900\s*\/|will draw|draws?|watt|watts)/i.test(a);
+  const dmmUsedForWatts = /(4900\s*\/\s*\d|(?:will|would|does|should)\s+draw\s+[\d,.]+\s*(?:w|watts?)|(?:equals?|=)\s*[\d,.]+\s*(?:w|watts?)|\b1[,]?166\s*(?:w|watts?)\b|disconnect[\s\S]{0,80}bring the wattage down)/i.test(a);
   if (dmmDcCase && dmmUsedForWatts) {
     return [
       'Direct answer: Do not calculate 70V operating wattage from that ordinary multimeter resistance reading.',
