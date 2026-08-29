@@ -103,12 +103,52 @@ function avaSystemPrompt() {
     "3. Safest next step",
     "4. Verification / assumptions / what still needs confirming",
     "For AV troubleshooting, ask at most one critical clarifying question when needed, but still provide a useful starting path.",
+    "Diagnose the actual failure layer before recommending replacement or increased power. Prefer reversible, high-information tests first.",
+    "RF coordination rule: do not recommend simple equal or equidistant channel spacing as a general cure for wireless intermodulation. Coordinate the actual transmitter set against intermodulation products with an appropriate coordination tool such as Shure Wireless Workbench or equivalent, using intermodulation-free/compatible frequencies and uneven spacing when the coordination requires it.",
+    "Constant-voltage audio rule: in 70V/100V distributed audio, normal cable resistance/insertion loss causes voltage drop and therefore reduces power delivered to downstream loudspeakers; it does not by itself increase the amplifier wattage load. Account for transformer taps and amplifier headroom separately.",
+    "Distributed-audio shutdown safety rule: if a 70V/100V amplifier shuts down, trips, overheats, or enters protection, do not recommend a larger or higher-power amplifier as the first remedy. First isolate shorts/ground faults, incorrect transformer tap wiring, excessive aggregate tap load, damaged cable or loudspeaker/transformer faults, output wiring errors, and the amplifier protection condition. Verify the load against manufacturer limits before changing amplifier size.",
+    "Never use a power upgrade to mask an unresolved wiring fault, protection event, or unexplained overload condition.",
+    "For safety/code/electrical/load/wall-mounting/structural issues, give practical guidance and recommend qualified professional verification when appropriate.",
     "Do not claim customer-data memory, file retrieval, device/code bank, payments, hardware control, automatic follow-up, database writes, or live customer storage unless the route and feature flag prove it is active.",
     "Current gated facts: customer data is off, file retrieval is off, code/device bank is off, voice is off, payments are off, hardware control is off, automatic follow-up is off, final visible being is pending owner upload.",
-    "For safety/code/electrical/load/wall-mounting/structural issues, give practical guidance and recommend qualified professional verification when appropriate.",
     "Never expose owner tokens, API keys, environment variables, private files, customer records, provider payloads, raw source packets, or internal secrets.",
     "If uncertain, say what must be verified instead of guessing."
   ].join("\n");
+}
+
+function avaTechnicalSafetyGuard(message, answer) {
+  const q = String(message || "");
+  const a = String(answer || "");
+  const qLower = q.toLowerCase();
+  const aLower = a.toLowerCase();
+
+  const distributedAudio = /(?:\b70\s*v\b|\b100\s*v\b|constant[-\s]?voltage|distributed audio)/i.test(q);
+  const protectionFault = /(shutdown|shut down|protection|protect mode|trip|overheat|overload|fault|short)/i.test(q);
+  const powerUpgrade = /(larger|bigger|higher[-\s]?power|more powerful|750\s*w|upgrade)[\s\S]{0,80}(amp|amplifier)|(amp|amplifier)[\s\S]{0,80}(larger|bigger|higher[-\s]?power|more powerful|750\s*w|upgrade)/i.test(a);
+  const faultIsolation = /(short|ground fault|transformer tap|tap load|wiring|damaged cable|voltage drop|protection|load calculation|aggregate load|disconnect.*branch|isolate.*branch)/i.test(a);
+
+  if (distributedAudio && protectionFault && powerUpgrade && !faultIsolation) {
+    return [
+      "Direct answer: Do not increase amplifier power yet. A 70V/100V amplifier that is shutting down or entering protection needs the fault/load condition isolated first.",
+      "Why it matters: normal line resistance causes voltage drop and less power at the loudspeakers; it does not create extra wattage demand that is cured by a larger amplifier. An unexplained shutdown can indicate a short/ground fault, incorrect transformer tap wiring, excessive total tap load, damaged cable or loudspeaker transformer, output wiring error, overheating, or another protection condition.",
+      "Safest next step: power down as appropriate, verify the summed transformer taps and required headroom against the amplifier rating, inspect the 70V/100V output wiring, and isolate branches/loads methodically to locate the fault before considering any amplifier replacement or power increase. Use qualified field/electrical help where the wiring or work scope requires it.",
+      "Verification: amplifier model, protection indication/log, configured output mode, total speaker tap wattage, branch wiring, and measured/isolated load behavior still need confirmation."
+    ].join("\n\n");
+  }
+
+  const rfCoordination = /(wireless|rf|radio frequency|microphone|intermodulation|frequency coordination|wireless workbench)/i.test(q);
+  const equidistantAdvice = /(equidistant|equal spacing|even spacing|evenly spaced)/i.test(a);
+  const imSafeCoordination = /(intermodulation[-\s]?free|intermodulation.*coordination|wireless workbench|coordination tool|compatible frequencies|uneven spacing)/i.test(a);
+
+  if (rfCoordination && equidistantAdvice && !imSafeCoordination) {
+    return `${a}\n\nTechnical correction: Equal/equidistant spacing is not a general intermodulation cure. Coordinate the actual transmitter set for compatible/intermodulation-free frequencies with Wireless Workbench or an equivalent coordination tool; the resulting frequency set may require uneven spacing.`;
+  }
+
+  if (distributedAudio && /(line resistance|insertion loss|voltage drop)/i.test(q) && /(increase|adds?|raises?)[\s\S]{0,40}(wattage|power|load)/i.test(aLower)) {
+    return `${a}\n\nTechnical correction: In a normally wired 70V/100V distributed line, cable resistance creates voltage drop and reduces power delivered downstream; it does not by itself increase the amplifier's transformer-tap wattage load.`;
+  }
+
+  return a;
 }
 
 async function callOpenAIForAva(message) {
@@ -167,10 +207,12 @@ async function callOpenAIForAva(message) {
       ?.join("\n")
     || "";
 
+  const rawAnswer = text || "AVA received the request, but the provider returned an empty text response.";
+
   return {
     ok: true,
     status: 200,
-    answer: text || "AVA received the request, but the provider returned an empty text response.",
+    answer: avaTechnicalSafetyGuard(message, rawAnswer),
     provider: {
       model,
       response_id: data.id || null
@@ -344,7 +386,25 @@ async function route(req, res) {
 }
 
 if (process.argv.includes("--self-test")) {
-  console.log("AVA backend self-test passed.");
+  const prompt = avaSystemPrompt();
+  if (!prompt.includes("RF coordination rule")) throw new Error("self-test failed: RF coordination rule missing");
+  if (!prompt.includes("Constant-voltage audio rule")) throw new Error("self-test failed: constant-voltage rule missing");
+  if (!prompt.includes("Distributed-audio shutdown safety rule")) throw new Error("self-test failed: distributed-audio shutdown rule missing");
+
+  const unsafe70V = avaTechnicalSafetyGuard(
+    "My 70V distributed audio amplifier keeps shutting down. Should I replace it with a bigger amplifier?",
+    "Yes. Upgrade to a larger 750W amplifier and the shutdown should stop."
+  );
+  if (/upgrade to a larger 750w amplifier/i.test(unsafe70V)) throw new Error("self-test failed: dangerous 70V amplifier upsell escaped guard");
+  if (!/short\/ground fault|short\/ground/i.test(unsafe70V) && !/short/i.test(unsafe70V)) throw new Error("self-test failed: 70V fault isolation missing");
+
+  const weakRf = avaTechnicalSafetyGuard(
+    "Coordinate 24 wireless microphones where third-order intermodulation is a concern.",
+    "Use equidistant spacing across the band."
+  );
+  if (!/intermodulation-free|compatible\/intermodulation-free|Wireless Workbench/i.test(weakRf)) throw new Error("self-test failed: RF coordination correction missing");
+
+  console.log("AVA backend self-test passed: RF coordination + distributed-audio safety guards active.");
   process.exit(0);
 }
 
