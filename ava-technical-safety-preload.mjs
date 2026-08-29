@@ -45,7 +45,7 @@ export function applyAvaTechnicalSafetyV2(message='', answer='') {
   }
 
   const videoCase = /(3g-sdi|12g-sdi|cross-converter|down-convert|capture|teams|usb)/i.test(q);
-  const claimsFrameDropping = /(drops?\s+(?:3\s+out\s+of\s+4\s+)?frames|dropping frames|slideshow)[\s\S]{0,120}(3g-sdi|converter|down-sampl)/i.test(a) || /(3g-sdi|converter|down-sampl)[\s\S]{0,120}(drops?\s+frames|slideshow)/i.test(a);
+  const claimsFrameDropping = /(drop(?:s|ping)?[\s\S]{0,45}frames?|3\s+out\s+of\s+every\s+4\s+frames?|slideshow)/i.test(a) && /(3g-sdi|converter|cross-converter|down-sampl|down-convert)/i.test(a);
   if (videoCase && claimsFrameDropping) {
     return `${a}\n\nTechnical correction: A properly functioning hardware down-converter does not normally create a slideshow merely because the input is 4K and the output path is 1080p. Verify the converter's supported conversion mode, then trace the USB capture path: capture-device limits, negotiated USB 3.x versus USB 2.0 mode, cable/hub quality, compression format, host bandwidth, and Teams/application frame-rate reporting before replacing the SDI converter.`;
   }
