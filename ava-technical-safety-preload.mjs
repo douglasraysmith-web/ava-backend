@@ -63,7 +63,7 @@ export function applyAvaTechnicalSafetyV2(message='', answer='') {
   }
 
   const councilCase = /(council|chamber|boardroom|desk microphone|mix-minus|automix|automixer|neighbor zone|adjacent)/i.test(q);
-  const neighborOverhead = /(neighbor|adjacent)[\s\S]{0,100}(overhead|ceiling|speaker)[\s\S]{0,80}(unity|route|feed|send)|(overhead|ceiling|speaker)[\s\S]{0,100}(neighbor|adjacent)[\s\S]{0,80}(unity|route|feed|send)/i.test(a);
+  const neighborOverhead = /(neighbor|adjacent)/i.test(a) && /(overhead|ceiling)[\s-]*(speaker|loudspeaker)|speaker|loudspeaker/i.test(a) && /(unity|route|feed|send|cross-point|crosspoint)/i.test(a);
   if (councilCase && neighborOverhead) {
     return `${a}\n\nTechnical correction: Do not default to reinforcing an adjacent person's microphone through the nearby overhead loudspeaker. At close seating distances that can create a local feedback path. First verify natural acoustic audibility, desk/furniture obstruction, microphone placement, automixer/gating threshold, gain structure, and the intended mix-minus/zoning design. Add local reinforcement only when the acoustic design and gain-before-feedback analysis support it.`;
   }
